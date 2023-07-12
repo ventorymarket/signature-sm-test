@@ -1,5 +1,5 @@
 # signature-sm-test
 
-- run test on local locklift test test/sample-test.ts --network local
+- run test on local <strong>locklift test test/sample-test.ts --network local</strong>
 
-- run test on testnet locklift test test/sample-test.ts --network venom_testnet
+- run test on testnet <strong>locklift test test/sample-test.ts --network venom_testnet</strong>
