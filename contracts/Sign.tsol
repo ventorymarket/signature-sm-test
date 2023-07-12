@@ -1,0 +1,95 @@
+pragma ever-solidity >=0.61.2;
+
+pragma AbiHeader expire;
+//pragma AbiHeader pubkey;
+pragma AbiHeader time;
+
+contract Sign {
+  uint256 static _nonce;
+  uint256 private state;
+
+  struct User {
+    uint _nonce;
+    uint128 _value;
+    address owner;
+  }
+
+  event StateChange(uint _state);
+
+  constructor(uint256 _state) public {
+    tvm.accept();
+
+    state = _state;
+  }
+
+  function setState(uint _state) public {
+    tvm.accept();
+    state = _state;
+    emit StateChange(_state);
+  }
+
+  function getState() external view returns (uint256) {
+    return state;
+  }
+
+  // function testSign(uint256 hashText, uint256 SignHighPart, uint256 SignLowPart, uint256 pubkey) external pure returns (bool) {
+  //  bool signatureIsValid = tvm.checkSign( hashText,  SignHighPart,  SignLowPart,  pubkey);
+  // return signatureIsValid;
+  //}
+
+  function testSign(
+    uint256 hashText,
+    uint256 SignHighPart,
+    uint256 SignLowPart,
+    uint256 pubkey
+  ) public pure returns (bool) {
+    // uint256 hashText = tvm.hash("abc");
+    //abi.decode(TvmCell, (TypeA, TypeB))
+    // string a = "1";
+    // a.toUint();
+    tvm.accept();
+    tvm.rawReserve(1 ever, 0);
+    bool check = tvm.checkSign(hashText, SignHighPart, SignLowPart, pubkey);
+    // require(check, 10001);
+    return check;
+    // return true;
+  }
+
+  function checkdata(string data) public pure returns (uint256) {
+    return tvm.hash(data);
+  }
+
+  function testEncode() external pure returns (uint256, TvmCell, uint256) {
+    User user = User(1, 2, msg.sender);
+    TvmCell data = abi.encode(user);
+    uint256 dataHash = tvm.hash("123456");
+    uint256 sha = sha256(format("{}{}", "123456","f8200c318d67fc6a6fba2900f60e07b231fe570b8a1f0bb241e0f9718b60d695"));
+   
+    // abi.decode(data, (TypeA, TypeB))
+    return (dataHash, data, sha);
+  }
+
+  function decode(TvmCell data) external pure returns (uint, uint128, address) {
+    (uint r, uint128 s, address sender) = abi.decode(data, (uint, uint128, address));
+    // (string rs) = abi.decode(data, (string));
+    return (r, s, sender);
+  }
+
+  function verifyBoc(TvmCell dataCell,TvmCell signature,uint256 pubKey) external pure returns(bool){
+    bool check = tvm.checkSign(tvm.hash(dataCell),signature.toSlice(),pubKey);
+    return check;
+  }
+
+  function getDataBoc(TvmCell dataCell,TvmCell signature) external returns(bool,bool){
+    uint256 pubKey = 0xf8200c318d67fc6a6fba2900f60e07b231fe570b8a1f0bb241e0f9718b60d695;
+    bool check = tvm.checkSign(tvm.hash(dataCell),signature.toSlice(),pubKey);
+    //bool _check2 = tvm.checkSign(tvm.hash(dataCell),tvm.hash(signature),pubKey);
+   // tvm.checkSign(uint256 hash, uint256 SignHighPart, uint256 SignLowPart, uint256 pubkey);
+    //require(check == true, 123);
+    return (check, check);
+  }
+
+  //function getType() external return(uint256){
+  //return tvm.hash(string data);
+  // }
+}
